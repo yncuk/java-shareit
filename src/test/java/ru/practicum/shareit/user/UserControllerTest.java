@@ -133,7 +133,7 @@ class UserControllerTest {
                 .email("user123@user.com")
                 .build();
         userController.create(user);
-        user = user.withEmail("updated@user.com");
+        user = user.toBuilder().email("updated@user.com").build();
         // then
         mockMvc.perform(patch("/users/3")
                         .content(new ObjectMapper().writeValueAsString(user))
