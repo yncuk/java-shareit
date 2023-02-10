@@ -33,21 +33,21 @@ class UserControllerTest {
     void createUserTest() throws Exception {
         // when
         User user = User.builder()
-                .name("user")
-                .email("user@user.com")
+                .name("user3")
+                .email("user3@user.com")
                 .build();
         mockMvc.perform(post("/users")
                         .content(new ObjectMapper().writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(1));
+        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(3));
         // then
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "user")
-                                .hasFieldOrPropertyWithValue("email", "user@user.com")
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", 3)
+                                .hasFieldOrPropertyWithValue("name", "user3")
+                                .hasFieldOrPropertyWithValue("email", "user3@user.com")
                 );
     }
 
@@ -108,16 +108,16 @@ class UserControllerTest {
                 .name("updated")
                 .email("updated@user.com")
                 .build();
-        mockMvc.perform(patch("/users/1")
+        mockMvc.perform(patch("/users/3")
                         .content(new ObjectMapper().writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(1));
+        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(3));
         // then
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", 3)
                                 .hasFieldOrPropertyWithValue("name", "updated")
                                 .hasFieldOrPropertyWithValue("email", "updated@user.com")
                 );
@@ -135,17 +135,17 @@ class UserControllerTest {
         userController.create(user);
         user = user.withEmail("updated@user.com");
         // then
-        mockMvc.perform(patch("/users/2")
+        mockMvc.perform(patch("/users/3")
                         .content(new ObjectMapper().writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(2));
+        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(3));
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 2)
-                                .hasFieldOrPropertyWithValue("name", "user")
-                                .hasFieldOrPropertyWithValue("email", "user@user.com")
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", 3)
+                                .hasFieldOrPropertyWithValue("name", "updated")
+                                .hasFieldOrPropertyWithValue("email", "updated@user.com")
                 );
     }
 
