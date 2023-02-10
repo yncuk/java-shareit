@@ -9,9 +9,7 @@ import lombok.With;
 public class Item {
     @With
     int id;
-    @With
     String name;
-    @With
     String description;
     @With
     Boolean available;

@@ -44,12 +44,12 @@ public class UserServiceImpl implements UserService {
         User newUser = userStorage.findById(userId);
         if (user.getEmail() != null) {
             if (!isEmailFound(user.getEmail())) {
-                newUser = newUser.withEmail(user.getEmail());
+                newUser = newUser.toBuilder().email(user.getEmail()).build();
                 log.info("Задаем новую почту пользователю - {}", user.getEmail());
             } else throw new ConflictException("Пользователь с такой почтой уже есть");
         }
         if (user.getName() != null) {
-            newUser = newUser.withName(user.getName());
+            newUser = newUser.toBuilder().name(user.getName()).build();
             log.info("Задаем новое имя пользователю - {}", user.getName());
         }
         return UserMapper.toUserDto(userStorage.update(userId, newUser));

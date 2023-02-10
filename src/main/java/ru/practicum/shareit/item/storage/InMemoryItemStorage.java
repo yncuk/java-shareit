@@ -58,11 +58,11 @@ public class InMemoryItemStorage implements ItemStorage {
                 log.info("Задали новый статус вещи {}", itemDto.getAvailable());
             }
             if (itemDto.getDescription() != null) {
-                newItem = newItem.withDescription(itemDto.getDescription());
+                newItem = newItem.toBuilder().description(itemDto.getDescription()).build();
                 log.info("Задали новое описание вещи {}", itemDto.getDescription());
             }
             if (itemDto.getName() != null) {
-                newItem = newItem.withName(itemDto.getName());
+                newItem = newItem.toBuilder().name(itemDto.getName()).build();
                 log.info("Задали новое название вещи {}", itemDto.getName());
             }
             items.get(userId).put(itemId, newItem);
