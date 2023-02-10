@@ -130,7 +130,7 @@ class UserControllerTest {
         // when
         User user = User.builder()
                 .name("user")
-                .email("user@user.com")
+                .email("user123@user.com")
                 .build();
         userController.create(user);
         user = user.withEmail("updated@user.com");
