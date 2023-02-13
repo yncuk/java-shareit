@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -26,38 +25,38 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findById(Integer id) throws EntityNotFoundException {
+    public UserDto findById(Integer id) {
         return UserMapper.toUserDto(userStorage.findById(id));
     }
 
     @Override
-    public UserDto create(User user) throws ConflictException {
-        if (isEmailFound(user.getEmail())) {
+    public UserDto create(UserDto userDto) {
+        if (isEmailFound(userDto.getEmail())) {
             throw new ConflictException("Пользователь с такой почтой уже есть");
         }
-        return UserMapper.toUserDto(userStorage.create(user));
+        return UserMapper.toUserDto(userStorage.create(UserMapper.toUser(userDto)));
     }
 
     @Override
-    public UserDto update(Integer userId, User user) throws EntityNotFoundException, ConflictException {
+    public UserDto update(Integer userId, UserDto userDto) {
         userStorage.findById(userId);
         User newUser = userStorage.findById(userId);
-        if (user.getEmail() != null) {
-            if (!isEmailFound(user.getEmail())) {
-                newUser = newUser.toBuilder().email(user.getEmail()).build();
-                log.info("Задаем новую почту пользователю - {}", user.getEmail());
+        if (userDto.getEmail() != null) {
+            if (!isEmailFound(userDto.getEmail())) {
+                newUser = newUser.toBuilder().email(userDto.getEmail()).build();
+                log.info("Задаем новую почту пользователю - {}", userDto.getEmail());
             } else throw new ConflictException("Пользователь с такой почтой уже есть");
         }
-        if (user.getName() != null) {
-            newUser = newUser.toBuilder().name(user.getName()).build();
-            log.info("Задаем новое имя пользователю - {}", user.getName());
+        if (userDto.getName() != null) {
+            newUser = newUser.toBuilder().name(userDto.getName()).build();
+            log.info("Задаем новое имя пользователю - {}", userDto.getName());
         }
         return UserMapper.toUserDto(userStorage.update(userId, newUser));
     }
 
     @Override
     public void delete(Integer userId) {
-        userStorage.delete(userId);
+        userStorage.softDelete(userId);
     }
 
     private Boolean isEmailFound(String email) {

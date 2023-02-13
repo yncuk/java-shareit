@@ -2,8 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -23,18 +21,18 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserDto findById(@PathVariable Integer userId) throws EntityNotFoundException {
+    public UserDto findById(@PathVariable Integer userId) {
         return userService.findById(userId);
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody User user) throws ConflictException {
-        return userService.create(user);
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Integer userId, @RequestBody User user) throws EntityNotFoundException, ConflictException {
-        return userService.update(userId, user);
+    public UserDto update(@PathVariable Integer userId, @RequestBody UserDto userDto) {
+        return userService.update(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")

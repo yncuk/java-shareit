@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exceptions.ConflictException;
-import ru.practicum.shareit.exceptions.EntityBadRequest;
+import ru.practicum.shareit.exceptions.EntityBadRequestException;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.ErrorResponse;
 
@@ -16,7 +16,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(final EntityBadRequest e) {
+    public ErrorResponse handleBadRequest(final EntityBadRequestException e) {
         log.debug("Ошибка 400, сообщение об ошибке: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
@@ -36,9 +36,9 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleInternalError(final InternalError e) {
-        log.debug("Ошибка 500, сообщение об ошибке: {}", e.getMessage());
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleException(final Exception e) {
+        log.debug("Ошибка 400, сообщение об ошибке: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 }

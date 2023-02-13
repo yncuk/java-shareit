@@ -12,6 +12,7 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserController;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ class ItemControllerTest {
                 .name("user")
                 .email("user@user.com")
                 .build();
-        userController.create(user);
+        userController.create(UserMapper.toUserDto(user));
         Item item = Item.builder()
                 .name("Отвертка")
                 .description("Обычная отвертка")
@@ -53,7 +54,7 @@ class ItemControllerTest {
                         .content(new ObjectMapper().writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1, 1));
+        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
         // then
         assertThat(itemOptional)
                 .isPresent()
@@ -175,7 +176,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1, 1));
+        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -213,7 +214,7 @@ class ItemControllerTest {
                 .name("user2")
                 .email("user2@user.com")
                 .build();
-        userController.create(user);
+        userController.create(UserMapper.toUserDto(user));
         Item item = Item.builder()
                 .name("Отвертка2")
                 .description("Обычная отвертка2")
@@ -262,7 +263,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1, 1));
+        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -288,7 +289,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1, 1));
+        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -314,7 +315,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1, 1));
+        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->

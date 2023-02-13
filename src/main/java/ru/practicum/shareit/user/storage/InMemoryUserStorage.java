@@ -6,6 +6,7 @@ import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -16,19 +17,21 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-        return users.values();
+        return users.values().stream().filter(a -> !a.getIsDeleted()).collect(Collectors.toList());
     }
 
     @Override
-    public User findById(Integer id) throws EntityNotFoundException {
+    public User findById(Integer id) {
         if (users.containsKey(id)) {
-            return users.get(id);
+            if (!users.get(id).getIsDeleted()) {
+                return users.get(id);
+            } else throw new EntityNotFoundException("Не найден пользователь");
         } else throw new EntityNotFoundException("Не найден пользователь");
     }
 
     @Override
     public User create(User user) {
-        user = user.withId(id);
+        user = user.withId(id).withIsDeleted(false);
         users.put(id, user);
         id++;
         log.info("Создаем пользователя {}", user);
@@ -43,8 +46,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void delete(Integer userId) {
-        users.remove(userId);
+    public void softDelete(Integer userId) {
+        User user = users.get(userId).withIsDeleted(true);
+        users.put(userId, user);
         log.info("Удаляем пользователя с id = {}", userId);
     }
 }

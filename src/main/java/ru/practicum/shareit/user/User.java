@@ -15,4 +15,6 @@ public class User {
     String name;
     @NotBlank @Email
     String email;
+    @With
+    Boolean isDeleted;
 }

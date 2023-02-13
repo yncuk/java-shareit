@@ -20,20 +20,16 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Collection<Item> findAll(Integer userId) {
-        if (items.get(userId) == null) {
+        Map<Integer, Item> userItems = items.get(userId);
+        if (userItems == null) {
             return new ArrayList<>();
         }
-        return items.get(userId).values();
+        return userItems.values();
     }
 
     @Override
-    public Item findById(Integer userId, Integer itemId) throws EntityNotFoundException {
-        for (Item currentItem : giveAllItem()) {
-            if (currentItem.getId() == itemId) {
-                return currentItem;
-            }
-        }
-        throw new EntityNotFoundException("Не найдена вещь");
+    public Item findById(Integer itemId) {
+        return giveAllItem().get(itemId);
     }
 
     @Override
@@ -43,6 +39,7 @@ public class InMemoryItemStorage implements ItemStorage {
             log.info("Создали место для вещей пользователю с id - {}", userId);
         }
         item = item.withId(id);
+        item = item.withOwner(userId);
         items.get(userId).put(id, item);
         id++;
         log.info("Создали новую вещь {}", item);
@@ -50,7 +47,7 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Item update(Integer userId, ItemDto itemDto, Integer itemId) throws EntityNotFoundException {
+    public Item update(Integer userId, ItemDto itemDto, Integer itemId) {
         if (items.get(userId).containsKey(itemId)) {
             Item newItem = items.get(userId).get(itemId);
             if (itemDto.getAvailable() != null) {
@@ -71,12 +68,12 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public List<Item> search(Integer userId, String text) {
+    public List<Item> search(String text) {
         List<Item> foundItem = new ArrayList<>();
         if (text.isBlank()) {
             return foundItem;
         }
-        for (Item currentItem : giveAllItem()) {
+        for (Item currentItem : giveAllItem().values()) {
             if (currentItem.getAvailable() && (currentItem.getName().toLowerCase().contains(text.toLowerCase()) ||
                     currentItem.getDescription().toLowerCase().contains(text.toLowerCase()))) {
                 foundItem.add(currentItem);
@@ -85,11 +82,11 @@ public class InMemoryItemStorage implements ItemStorage {
         return foundItem;
     }
 
-    private List<Item> giveAllItem() {
-        List<Item> allItem = new ArrayList<>();
+    private Map<Integer, Item> giveAllItem() {
+        Map<Integer, Item> allItems = new HashMap<>();
         for (Map<Integer, Item> currentItems : items.values()) {
-            allItem.addAll(currentItems.values());
+            allItems.putAll(currentItems);
         }
-        return allItem;
+        return allItems;
     }
 }

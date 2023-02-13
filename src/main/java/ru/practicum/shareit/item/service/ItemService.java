@@ -1,19 +1,17 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.exceptions.EntityBadRequest;
-import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Collection;
 
 public interface ItemService {
-    Collection<ItemDto> findAll(Integer userId) throws EntityNotFoundException;
+    Collection<ItemDto> findAll(Integer userId);
 
-    ItemDto findById(Integer userId, Integer itemId) throws EntityNotFoundException;
+    ItemDto findById(Integer itemId);
 
-    ItemDto create(Integer userId, ItemDto itemDto) throws EntityNotFoundException, EntityBadRequest;
+    ItemDto create(Integer userId, ItemDto itemDto);
 
-    ItemDto update(Integer userId, ItemDto itemDto, Integer itemId) throws EntityNotFoundException;
+    ItemDto update(Integer userId, ItemDto itemDto, Integer itemId);
 
-    Collection<ItemDto> search(Integer userId, String text) throws EntityNotFoundException;
+    Collection<ItemDto> search(String text);
 }

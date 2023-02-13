@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
@@ -17,10 +17,14 @@ public class UserMapper {
     }
 
     public static Collection<UserDto> allToUserDto(Collection<User> users) {
-        Collection<UserDto> returnUsers = new ArrayList<>();
-        for (User currentUser : users) {
-            returnUsers.add(toUserDto(currentUser));
-        }
-        return returnUsers;
+        return users.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+    }
+
+    public static User toUser(UserDto userDto) {
+        return User.builder()
+                .id(userDto.getId())
+                .name(userDto.getName())
+                .email(userDto.getEmail())
+                .build();
     }
 }

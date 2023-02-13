@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ class UserControllerTest {
                 .email("user3@user.com")
                 .build();
         mockMvc.perform(post("/users")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(3));
@@ -62,7 +63,7 @@ class UserControllerTest {
                 .build();
         // then
         mockMvc.perform(post("/users")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
@@ -77,7 +78,7 @@ class UserControllerTest {
                 .build();
         // then
         mockMvc.perform(post("/users")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
@@ -94,7 +95,7 @@ class UserControllerTest {
                 .build();
         // then
         mockMvc.perform(post("/users")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
@@ -109,7 +110,7 @@ class UserControllerTest {
                 .email("updated@user.com")
                 .build();
         mockMvc.perform(patch("/users/3")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(3));
@@ -132,11 +133,11 @@ class UserControllerTest {
                 .name("user")
                 .email("user123@user.com")
                 .build();
-        userController.create(user);
+        userController.create(UserMapper.toUserDto(user));
         user = user.toBuilder().email("updated@user.com").build();
         // then
         mockMvc.perform(patch("/users/3")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
         Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(3));
@@ -162,11 +163,11 @@ class UserControllerTest {
                 .build();
         // then
         mockMvc.perform(patch("/users/2")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         mockMvc.perform(patch("/users/2")
-                        .content(new ObjectMapper().writeValueAsString(user1))
+                        .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user1)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(2));
