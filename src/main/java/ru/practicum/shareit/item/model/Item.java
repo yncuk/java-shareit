@@ -5,13 +5,15 @@ import lombok.Value;
 import lombok.With;
 
 @Value
-@With
 @Builder(toBuilder = true)
 public class Item {
+    @With
     int id;
     String name;
     String description;
+    @With
     Boolean available;
+    @With
     int owner;
     int request;
 }
