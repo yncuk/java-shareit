@@ -131,10 +131,12 @@ class UserControllerTest {
         // when
         User user = User.builder()
                 .name("user")
-                .email("updated@user.com")
+                .email("user123@user.com")
                 .build();
+        userController.create(UserMapper.toUserDto(user));
+        user = user.toBuilder().email("updated@user.com").build();
         // then
-        mockMvc.perform(patch("/users/3")
+        mockMvc.perform(patch("/users/4")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
