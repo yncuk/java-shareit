@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
         userStorage.findById(userId);
         User newUser = userStorage.findById(userId);
         if (userDto.getEmail() != null) {
-            if (!isEmailFound(userDto.getEmail())) {
+            if (!isEmailFound(userDto.getEmail()) || newUser.getEmail().equals(userDto.getEmail())) {
                 newUser = newUser.toBuilder().email(userDto.getEmail()).build();
                 log.info("Задаем новую почту пользователю - {}", userDto.getEmail());
             } else throw new ConflictException("Пользователь с такой почтой уже есть");
