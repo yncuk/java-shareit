@@ -131,10 +131,8 @@ class UserControllerTest {
         // when
         User user = User.builder()
                 .name("user")
-                .email("user123@user.com")
+                .email("updated@user.com")
                 .build();
-        userController.create(UserMapper.toUserDto(user));
-        user = user.toBuilder().email("updated@user.com").build();
         // then
         mockMvc.perform(patch("/users/3")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
