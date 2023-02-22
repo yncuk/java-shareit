@@ -32,7 +32,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto create(Integer userId, ItemDto itemDto) {
         userStorage.findById(userId);
-        return ItemMapper.toItemDto(itemStorage.create(userId, ItemMapper.toItem(itemDto)));
+        return ItemMapper.toItemDto(itemStorage.create(userId, ItemMapper.toItem(itemDto, userId)));
     }
 
     @Override

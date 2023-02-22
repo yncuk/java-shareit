@@ -39,7 +39,6 @@ public class InMemoryItemStorage implements ItemStorage {
             log.info("Создали место для вещей пользователю с id - {}", userId);
         }
         item = item.withId(id);
-        item = item.withOwner(userId);
         items.get(userId).put(id, item);
         id++;
         log.info("Создали новую вещь {}", item);

@@ -19,12 +19,13 @@ public class ItemMapper {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 
-    public static Item toItem(ItemDto itemDto) {
+    public static Item toItem(ItemDto itemDto, Integer userId) {
         return Item.builder()
                 .id(itemDto.getId())
                 .description(itemDto.getDescription())
                 .name(itemDto.getName())
                 .available(itemDto.getAvailable())
+                .owner(userId)
                 .build();
     }
 }
