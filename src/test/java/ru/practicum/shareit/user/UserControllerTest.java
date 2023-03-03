@@ -8,9 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.JpaTest;
 import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -22,26 +25,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class UserControllerTest {
+@Sql({"classpath:schema.sql"})
+class UserControllerTest extends JpaTest {
     @Autowired
     private MockMvc mockMvc;
+    //@Autowired
+    //private UserController userController;
     @Autowired
-    private UserController userController;
+    private UserRepository userRepository;
 
     @Order(1)
     @Test
     @DisplayName("Create user test")
     void createUserTest() throws Exception {
         // when
-        User user = User.builder()
-                .name("user1")
-                .email("user1@user.com")
-                .build();
+        User user = new User();
+        user.setName("user1");
+        user.setEmail("user1@user.com");
         mockMvc.perform(post("/users")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(1));
+        Optional<User> userOptional = userRepository.findById(1);
         // then
         assertThat(userOptional)
                 .isPresent()
@@ -57,10 +62,9 @@ class UserControllerTest {
     @DisplayName("Create user with duplicate email")
     void createUserWithDuplicateEmail() throws Exception {
         // when
-        User user = User.builder()
-                .name("user2")
-                .email("user1@user.com")
-                .build();
+        User user = new User();
+        user.setName("user2");
+        user.setEmail("user1@user.com");
         // then
         mockMvc.perform(post("/users")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
@@ -73,9 +77,8 @@ class UserControllerTest {
     @DisplayName("Create user without email")
     void createUserWithoutEmail() throws Exception {
         // when
-        User user = User.builder()
-                .name("user2")
-                .build();
+        User user = new User();
+        user.setName("user2");
         // then
         mockMvc.perform(post("/users")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
@@ -89,10 +92,9 @@ class UserControllerTest {
     @DisplayName("Create user with bad email")
     void createUserWithBadEmail(String mail) throws Exception {
         // when
-        User user = User.builder()
-                .name("user2")
-                .email(mail)
-                .build();
+        User user = new User();
+        user.setName("user2");
+        user.setEmail(mail);
         // then
         mockMvc.perform(post("/users")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
@@ -105,15 +107,14 @@ class UserControllerTest {
     @DisplayName("Update user test")
     void updateUserTest() throws Exception {
         // when
-        User user = User.builder()
-                .name("updated")
-                .email("updated@user.com")
-                .build();
+        User user = new User();
+        user.setName("updated");
+        user.setEmail("updated@user.com");
         mockMvc.perform(patch("/users/1")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(1));
+        Optional<User> userOptional = userRepository.findById(1);
         // then
         assertThat(userOptional)
                 .isPresent()
@@ -129,18 +130,17 @@ class UserControllerTest {
     @DisplayName("Update user with exist email")
     void updateUserWithExistEmail() throws Exception {
         // when
-        User user = User.builder()
-                .name("user")
-                .email("user123@user.com")
-                .build();
-        userController.create(UserMapper.toUserDto(user));
-        user = user.toBuilder().email("updated@user.com").build();
+        User user = new User();
+        user.setName("user");
+        user.setEmail("user123@user.com");
+        userRepository.save(user);
+        user.setEmail("updated@user.com");
         // then
         mockMvc.perform(patch("/users/2")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(1));
+        Optional<User> userOptional = userRepository.findById(1);
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -155,26 +155,24 @@ class UserControllerTest {
     @DisplayName("Update user with only name or only email")
     void updateUserWithOnlyNameOrOnlyEmail() throws Exception {
         // when
-        User user = User.builder()
-                .name("updatedName")
-                .build();
-        User user1 = User.builder()
-                .email("updatedEmail@user.com")
-                .build();
+        User user = new User();
+        user.setName("updatedName");
+        User user1 = new User();
+        user.setEmail("updatedEmail@user.com");
         // then
-        mockMvc.perform(patch("/users/2")
+        mockMvc.perform(patch("/users/3")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        mockMvc.perform(patch("/users/2")
+        mockMvc.perform(patch("/users/3")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user1)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<UserDto> userOptional = Optional.ofNullable(userController.findById(2));
+        Optional<User> userOptional = userRepository.findById(3);
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user2 ->
-                        assertThat(user2).hasFieldOrPropertyWithValue("id", 2)
+                        assertThat(user2).hasFieldOrPropertyWithValue("id", 3)
                                 .hasFieldOrPropertyWithValue("name", "updatedName")
                                 .hasFieldOrPropertyWithValue("email", "updatedEmail@user.com")
                 );
@@ -195,9 +193,9 @@ class UserControllerTest {
     @DisplayName("Get user before delete")
     void getUserBeforeDelete() throws Exception {
         // then
-        mockMvc.perform(get("/users/2"))
+        mockMvc.perform(get("/users/3"))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.id").value(3))
                 .andExpect(jsonPath("$.name").value("updatedName"))
                 .andExpect(jsonPath("$.email").value("updatedEmail@user.com"));
     }
@@ -207,9 +205,9 @@ class UserControllerTest {
     @DisplayName("Delete user and get after")
     void deleteUserAndGetAfter() throws Exception {
         // then
-        mockMvc.perform(delete("/users/2"))
+        mockMvc.perform(delete("/users/3"))
                 .andExpect(status().is2xxSuccessful());
-        mockMvc.perform(get("/users/2"))
+        mockMvc.perform(get("/users/3"))
                 .andExpect(status().is4xxClientError());
     }
 }

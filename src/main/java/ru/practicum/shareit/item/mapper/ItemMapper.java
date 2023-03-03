@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.mapper;
 
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoComments;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
@@ -12,7 +13,9 @@ public class ItemMapper {
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable());
+                item.getAvailable(),
+                null,
+                null);
     }
 
     public static Collection<ItemDto> allToItemDto(Collection<Item> items) {
@@ -20,12 +23,27 @@ public class ItemMapper {
     }
 
     public static Item toItem(ItemDto itemDto, Integer userId) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .description(itemDto.getDescription())
-                .name(itemDto.getName())
-                .available(itemDto.getAvailable())
-                .owner(userId)
-                .build();
+        Item item = new Item();
+        item.setId(itemDto.getId());
+        item.setDescription(itemDto.getDescription());
+        item.setName(itemDto.getName());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwner(userId);
+        return item;
+    }
+
+    public static ItemDtoComments toItemDtoWithComments(Item item) {
+        return new ItemDtoComments(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                null,
+                null,
+                CommentMapper.allToCommentDto(item.getComments()));
+    }
+
+    public static Collection<ItemDtoComments> allToItemDtoWithComments(Collection<Item> items) {
+        return items.stream().map(ItemMapper::toItemDtoWithComments).collect(Collectors.toList());
     }
 }

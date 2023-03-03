@@ -1,19 +1,35 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
-import lombok.Value;
-import lombok.With;
+import lombok.*;
 
-@Value
-@Builder(toBuilder = true)
+import javax.persistence.*;
+import java.util.Set;
+
+@Entity
+@Table(name = "ITEMS")
+@Getter
+@Setter
+@ToString
 public class Item {
-    @With
-    int id;
+
+    @Id
+    @Column(name = "ITEM_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "ITEM_NAME")
     String name;
+
     String description;
-    @With
+
     Boolean available;
-    @With
+
+    @Column(name = "OWNER_ID")
     int owner;
+
+    @Column(name = "REQUEST_ID")
     int request;
+
+    @OneToMany(mappedBy = "itemId")
+    Set<Comment> comments;
 }

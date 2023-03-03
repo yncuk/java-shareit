@@ -6,13 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.JpaTest;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserController;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Optional;
 
@@ -25,36 +27,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ItemControllerTest {
+@Sql({"classpath:schema.sql"})
+class ItemControllerTest extends JpaTest {
     @Autowired
     private MockMvc mockMvc;
+    //@Autowired
+    //private ItemController itemController;
+    //@Autowired
+    //private UserController userController;
     @Autowired
-    private ItemController itemController;
+    private UserRepository userRepository;
     @Autowired
-    private UserController userController;
+    private ItemRepository itemRepository;
+
 
     @Order(1)
     @Test
     @DisplayName("Create item test")
     void createItemTest() throws Exception {
         // when
-        User user = User.builder()
-                .name("user")
-                .email("user@user.com")
-                .build();
-        userController.create(UserMapper.toUserDto(user));
-        Item item = Item.builder()
-                .name("Отвертка")
-                .description("Обычная отвертка")
-                .available(true)
-                .build();
+        User user = new User();
+        user.setName("user");
+        user.setEmail("user@user.com");
+        userRepository.save(user);
+        Item item = new Item();
+        item.setName("Отвертка");
+        item.setDescription("Обычная отвертка");
+        item.setAvailable(true);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1)
                         .content(new ObjectMapper().writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
+        Optional<Item> itemOptional = itemRepository.findById(1);
         // then
         assertThat(itemOptional)
                 .isPresent()
@@ -71,11 +77,10 @@ class ItemControllerTest {
     @DisplayName("Create item without header X-Sharer-User-Id")
     void createItemWithoutHeader() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("Обычная отвертка2")
-                .available(true)
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("Обычная отвертка2");
+        item.setAvailable(true);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
@@ -89,11 +94,10 @@ class ItemControllerTest {
     @DisplayName("Create item with not found user")
     void createItemWithNotFoundUser() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("Обычная отвертка2")
-                .available(true)
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("Обычная отвертка2");
+        item.setAvailable(true);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
@@ -108,10 +112,9 @@ class ItemControllerTest {
     @DisplayName("Create item without available")
     void createItemWithoutAvailable() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("Обычная отвертка2")
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("Обычная отвертка2");
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
@@ -126,11 +129,10 @@ class ItemControllerTest {
     @DisplayName("Create item with empty name")
     void createItemWithEmptyName() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("")
-                .description("Обычная отвертка2")
-                .available(true)
-                .build();
+        Item item = new Item();
+        item.setName("");
+        item.setDescription("Обычная отвертка2");
+        item.setAvailable(true);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
@@ -145,11 +147,10 @@ class ItemControllerTest {
     @DisplayName("Create item with empty description")
     void createItemWithEmptyDescription() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("")
-                .available(true)
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("");
+        item.setAvailable(true);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
@@ -164,11 +165,10 @@ class ItemControllerTest {
     @DisplayName("Update item test")
     void updateItemTest() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка+")
-                .description("Обычная отвертка+")
-                .available(false)
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка+");
+        item.setDescription("Обычная отвертка+");
+        item.setAvailable(false);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         mockMvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", 1)
@@ -176,7 +176,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
+        Optional<Item> itemOptional = itemRepository.findById(1);
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -192,11 +192,10 @@ class ItemControllerTest {
     @DisplayName("Update item without header X-Sharer-User-Id")
     void updateItemWithoutHeader() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("Обычная отвертка2")
-                .available(false)
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("Обычная отвертка2");
+        item.setAvailable(false);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(patch("/items/1")
@@ -210,16 +209,14 @@ class ItemControllerTest {
     @DisplayName("Update item with user 2")
     void updateItemWithUser2() throws Exception {
         // when
-        User user = User.builder()
-                .name("user2")
-                .email("user2@user.com")
-                .build();
-        userController.create(UserMapper.toUserDto(user));
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("Обычная отвертка2")
-                .available(false)
-                .build();
+        User user = new User();
+        user.setName("user2");
+        user.setEmail("user2@user.com");
+        userRepository.save(user);
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("Обычная отвертка2");
+        item.setAvailable(false);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(patch("/items/1")
@@ -234,11 +231,10 @@ class ItemControllerTest {
     @DisplayName("Update not found item")
     void updateNotFoundItem() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка2")
-                .description("Обычная отвертка2")
-                .available(false)
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка2");
+        item.setDescription("Обычная отвертка2");
+        item.setAvailable(false);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(patch("/items/10")
@@ -253,9 +249,8 @@ class ItemControllerTest {
     @DisplayName("Update item available")
     void updateItemAvailable() throws Exception {
         // when
-        Item item = Item.builder()
-                .available(true)
-                .build();
+        Item item = new Item();
+        item.setAvailable(true);
         ItemDto itemDto = ItemMapper.toItemDto(item);
         mockMvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", 1)
@@ -263,7 +258,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
+        Optional<Item> itemOptional =itemRepository.findById(1);
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -279,9 +274,8 @@ class ItemControllerTest {
     @DisplayName("Update item description")
     void updateItemDescription() throws Exception {
         // when
-        Item item = Item.builder()
-                .description("Обычная отвертка-")
-                .build();
+        Item item = new Item();
+        item.setDescription("Обычная отвертка-");
         ItemDto itemDto = ItemMapper.toItemDto(item);
         mockMvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", 1)
@@ -289,7 +283,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
+        Optional<Item> itemOptional = itemRepository.findById(1);
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
@@ -305,9 +299,8 @@ class ItemControllerTest {
     @DisplayName("Update item name")
     void updateItemName() throws Exception {
         // when
-        Item item = Item.builder()
-                .name("Отвертка-")
-                .build();
+        Item item = new Item();
+        item.setName("Отвертка-");
         ItemDto itemDto = ItemMapper.toItemDto(item);
         mockMvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", 1)
@@ -315,7 +308,7 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<ItemDto> itemOptional = Optional.ofNullable(itemController.findById(1));
+        Optional<Item> itemOptional = itemRepository.findById(1);
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
