@@ -258,7 +258,7 @@ class ItemControllerTest extends JpaTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         // then
-        Optional<Item> itemOptional =itemRepository.findById(1);
+        Optional<Item> itemOptional = itemRepository.findById(1);
         assertThat(itemOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->

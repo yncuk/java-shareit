@@ -24,11 +24,11 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Optional<Booking> findByBookerIdAndItemId(Integer userId, Integer itemId, BookingStatus status, LocalDateTime now);
 
 
-    Booking findTop1ByItem_IdAndEndBeforeAndStatusOrderByEndDesc(int item_id, LocalDateTime end, BookingStatus status);
+    Booking findTop1ByItem_IdAndEndBeforeAndStatusOrderByEndDesc(int itemId, LocalDateTime end, BookingStatus status);
 
-    Booking findTop1ByItem_IdAndStartAfterAndStatusOrderByStartAsc(int item_id, LocalDateTime start, BookingStatus status);
+    Booking findTop1ByItem_IdAndStartAfterAndStatusOrderByStartAsc(int itemId, LocalDateTime start, BookingStatus status);
 
-    @Query( " select b from Booking b " +
+    @Query(" select b from Booking b " +
             "where b.item.id = ?1 and b.end < ?2 and b.status = ?3 and b.item.owner = ?4 " +
             "order by b.end desc ")
     Booking findLastBookingByItem(Integer itemId, LocalDateTime now, BookingStatus status, Integer userId);

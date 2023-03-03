@@ -8,7 +8,9 @@ import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "USERS")
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 public class User {
     @Id
     @Column(name = "USER_ID")
