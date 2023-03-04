@@ -16,13 +16,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-@Configuration
+/*@Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
         basePackages = {"ru.practicum.shareit"}
 )
 public class DbConfig {
-    private static final String URL = "jdbc:postgresql://localhost:5432/shareit";
+    //private static final String URL = "jdbc:postgresql://localhost:5432/shareit";
+    private static final String URL = "jdbc:h2:file:./db/shareit";
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
 
@@ -31,7 +32,8 @@ public class DbConfig {
     public DataSource dataSource() {
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
-                .driverClassName("org.postgresql.Driver")
+                //.driverClassName("org.postgresql.Driver")
+                .driverClassName("org.h2.Driver")
                 .username(USERNAME)
                 .password(PASSWORD)
                 .url(URL)
@@ -56,4 +58,4 @@ public class DbConfig {
             @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
-}
+}*/
