@@ -16,14 +16,15 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
+    private final String headerUserId = "X-Sharer-User-Id";
 
     @GetMapping
-    public Collection<ItemDtoComments> findAll(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public Collection<ItemDtoComments> findAll(@RequestHeader(headerUserId) int userId) {
         return itemService.findAll(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoComments findById(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable Integer itemId) {
+    public ItemDtoComments findById(@RequestHeader(headerUserId) int userId, @PathVariable Integer itemId) {
         return itemService.findById(userId, itemId);
     }
 
@@ -33,7 +34,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody ItemDto itemDto) {
+    public ItemDto create(@RequestHeader(headerUserId) int userId, @RequestBody ItemDto itemDto) {
         if (itemDto.getAvailable() == null || itemDto.getName().isBlank() || itemDto.getName() == null ||
                 itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
             throw new EntityBadRequestException("Не корректные данные в запросе");
@@ -42,12 +43,12 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
+    public ItemDto update(@RequestHeader(headerUserId) int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
         return itemService.update(userId, itemDto, itemId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody Comment comment, @PathVariable Integer itemId) {
+    public CommentDto createComment(@RequestHeader(headerUserId) int userId, @RequestBody Comment comment, @PathVariable Integer itemId) {
         return itemService.createComment(userId, comment, itemId);
     }
 }

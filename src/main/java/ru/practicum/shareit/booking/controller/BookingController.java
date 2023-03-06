@@ -16,29 +16,30 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
+    private final String headerUserId = "X-Sharer-User-Id";
 
     @GetMapping("/{bookingId}")
-    public BookingDto findById(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable Integer bookingId) {
+    public BookingDto findById(@RequestHeader(headerUserId) int userId, @PathVariable Integer bookingId) {
         return bookingService.findById(userId, bookingId);
     }
 
     @GetMapping
-    public Collection<BookingDto> findAllByBooker(@RequestHeader("X-Sharer-User-Id") int bookerId, @RequestParam(required = false, defaultValue = "ALL") String state) {
+    public Collection<BookingDto> findAllByBooker(@RequestHeader(headerUserId) int bookerId, @RequestParam(required = false, defaultValue = "ALL") String state) {
         return bookingService.findAllByBooker(bookerId, state);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDto> findAllByOwner(@RequestHeader("X-Sharer-User-Id") int ownerId, @RequestParam(required = false, defaultValue = "ALL") String state) {
+    public Collection<BookingDto> findAllByOwner(@RequestHeader(headerUserId) int ownerId, @RequestParam(required = false, defaultValue = "ALL") String state) {
         return bookingService.findAllByOwner(ownerId, state);
     }
 
     @PostMapping
-    public BookingDto create(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody BookingDtoInput bookingDtoInput) {
+    public BookingDto create(@RequestHeader(headerUserId) int userId, @RequestBody BookingDtoInput bookingDtoInput) {
         return bookingService.create(userId, bookingDtoInput);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto update(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable Integer bookingId, @RequestParam Boolean approved) {
+    public BookingDto update(@RequestHeader(headerUserId) int userId, @PathVariable Integer bookingId, @RequestParam Boolean approved) {
         return bookingService.update(userId, bookingId, approved);
     }
 }

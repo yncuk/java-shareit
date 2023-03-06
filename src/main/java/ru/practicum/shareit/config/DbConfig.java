@@ -22,7 +22,6 @@ import javax.sql.DataSource;
         basePackages = {"ru.practicum.shareit"}
 )
 public class DbConfig {
-    //private static final String URL = "jdbc:postgresql://localhost:5432/shareit";
     private static final String URL = "jdbc:h2:mem:shareit";
     private static final String USERNAME = "test";
     private static final String PASSWORD = "test";
@@ -32,7 +31,6 @@ public class DbConfig {
     public DataSource dataSource() {
         return DataSourceBuilder.create()
                 .type(HikariDataSource.class)
-                //.driverClassName("org.postgresql.Driver")
                 .driverClassName("org.h2.Driver")
                 .username(USERNAME)
                 .password(PASSWORD)

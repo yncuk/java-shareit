@@ -98,7 +98,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto update(Integer userId, Integer bookingId, Boolean approved) {
         userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
-        Booking booking = bookingRepository.findByOwnerIdAndBookingId(userId, bookingId).orElseThrow(() -> new EntityNotFoundException("У пользователя нет этого бронирования"));
+        Booking booking = bookingRepository.findByOwnerIdAndBookingId(userId, bookingId).orElseThrow(() -> new EntityNotFoundException("У пользователя нет этого бронирования с id = " + bookingId));
         if (approved) {
             if (booking.getStatus().equals(BookingStatus.WAITING)) {
                 booking.setStatus(BookingStatus.APPROVED);

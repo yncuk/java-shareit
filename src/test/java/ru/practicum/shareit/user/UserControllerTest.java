@@ -29,8 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest extends JpaTest {
     @Autowired
     private MockMvc mockMvc;
-    //@Autowired
-    //private UserController userController;
     @Autowired
     private UserRepository userRepository;
 

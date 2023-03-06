@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.model;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -10,12 +11,13 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
+@FieldDefaults(level= AccessLevel.PRIVATE)
 public class Item {
 
     @Id
     @Column(name = "ITEM_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    int id;
 
     @Column(name = "ITEM_NAME")
     String name;

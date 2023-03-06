@@ -1,8 +1,10 @@
 package ru.practicum.shareit.booking.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -18,11 +20,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
+@FieldDefaults(level= AccessLevel.PRIVATE)
 public class Booking {
     @Id
     @Column(name = "BOOKING_ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    int id;
 
     @Column(name = "START_TIME")
     LocalDateTime start;
