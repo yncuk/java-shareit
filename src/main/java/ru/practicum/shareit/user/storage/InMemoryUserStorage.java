@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,7 +31,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        user = user.withId(id).withIsDeleted(false);
+        user.setId(id);
+        user.setIsDeleted(false);
         users.put(id, user);
         id++;
         log.info("Создаем пользователя {}", user);
@@ -47,8 +48,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void softDelete(Integer userId) {
-        User user = users.get(userId).withIsDeleted(true);
-        users.put(userId, user);
+        users.get(userId).setIsDeleted(true);
         log.info("Удаляем пользователя с id = {}", userId);
     }
 }
