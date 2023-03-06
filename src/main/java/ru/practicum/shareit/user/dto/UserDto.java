@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @AllArgsConstructor
-@FieldDefaults(level= AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserDto {
     int id;
     String name;

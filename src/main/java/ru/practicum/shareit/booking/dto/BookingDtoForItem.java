@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@FieldDefaults(level= AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingDtoForItem {
 
     int id;

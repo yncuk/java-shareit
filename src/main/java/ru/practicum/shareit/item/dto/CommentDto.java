@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-@FieldDefaults(level= AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentDto {
 
     int id;

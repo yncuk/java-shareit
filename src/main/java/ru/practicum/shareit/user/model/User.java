@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 @ToString
-@FieldDefaults(level= AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
     @Column(name = "USER_ID")
