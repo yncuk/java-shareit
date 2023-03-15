@@ -1,14 +1,15 @@
 package ru.practicum.shareit.exceptions.handler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.EntityBadRequestException;
-import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.ErrorResponse;
+
+import javax.persistence.EntityNotFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,7 +31,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleConflictException(final ConflictException e) {
+    public ErrorResponse handleConflictException(final DataIntegrityViolationException e) {
         log.debug("Ошибка 409, сообщение об ошибке: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }

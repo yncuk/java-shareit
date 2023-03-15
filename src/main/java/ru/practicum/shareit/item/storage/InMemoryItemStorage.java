@@ -38,7 +38,7 @@ public class InMemoryItemStorage implements ItemStorage {
             items.put(userId, new HashMap<>());
             log.info("Создали место для вещей пользователю с id - {}", userId);
         }
-        item = item.withId(id);
+        item.setId(id);
         items.get(userId).put(id, item);
         id++;
         log.info("Создали новую вещь {}", item);
@@ -50,15 +50,15 @@ public class InMemoryItemStorage implements ItemStorage {
         if (items.get(userId).containsKey(itemId)) {
             Item newItem = items.get(userId).get(itemId);
             if (itemDto.getAvailable() != null) {
-                newItem = newItem.withAvailable(itemDto.getAvailable());
+                newItem.setAvailable(itemDto.getAvailable());
                 log.info("Задали новый статус вещи {}", itemDto.getAvailable());
             }
             if (itemDto.getDescription() != null) {
-                newItem = newItem.toBuilder().description(itemDto.getDescription()).build();
+                newItem.setDescription(itemDto.getDescription());
                 log.info("Задали новое описание вещи {}", itemDto.getDescription());
             }
             if (itemDto.getName() != null) {
-                newItem = newItem.toBuilder().name(itemDto.getName()).build();
+                newItem.setName(itemDto.getName());
                 log.info("Задали новое название вещи {}", itemDto.getName());
             }
             items.get(userId).put(itemId, newItem);

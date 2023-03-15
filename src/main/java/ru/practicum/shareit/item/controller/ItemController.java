@@ -1,9 +1,12 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.exceptions.EntityBadRequestException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoComments;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
@@ -13,15 +16,16 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
+    private final String headerUserId = "X-Sharer-User-Id";
 
     @GetMapping
-    public Collection<ItemDto> findAll(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public Collection<ItemDtoComments> findAll(@RequestHeader(headerUserId) int userId) {
         return itemService.findAll(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findById(@PathVariable Integer itemId) {
-        return itemService.findById(itemId);
+    public ItemDtoComments findById(@RequestHeader(headerUserId) int userId, @PathVariable Integer itemId) {
+        return itemService.findById(userId, itemId);
     }
 
     @GetMapping("/search")
@@ -30,7 +34,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody ItemDto itemDto) {
+    public ItemDto create(@RequestHeader(headerUserId) int userId, @RequestBody ItemDto itemDto) {
         if (itemDto.getAvailable() == null || itemDto.getName().isBlank() || itemDto.getName() == null ||
                 itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
             throw new EntityBadRequestException("Не корректные данные в запросе");
@@ -39,7 +43,12 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader("X-Sharer-User-Id") int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
+    public ItemDto update(@RequestHeader(headerUserId) int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
         return itemService.update(userId, itemDto, itemId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader(headerUserId) int userId, @RequestBody Comment comment, @PathVariable Integer itemId) {
+        return itemService.createComment(userId, comment, itemId);
     }
 }
