@@ -9,18 +9,28 @@ create table IF NOT EXISTS USERS
     IS_DELETED BOOLEAN,
     CONSTRAINT UQ_USER_EMAIL UNIQUE (email)
 );
+create table IF NOT EXISTS ITEM_REQUEST
+(
+    ITEM_REQUEST_ID serial
+        constraint "ITEM_REQUEST_pk"
+            primary key
+        unique,
+    DESCRIPTION     VARCHAR,
+    REQUESTER_ID    INTEGER,
+    created         TIMESTAMP
+);
 create table IF NOT EXISTS ITEMS
 (
-    ITEM_ID     serial,
+    ITEM_ID     serial
+        constraint "ITEMS_pk"
+        primary key,
     ITEM_NAME   VARCHAR,
     DESCRIPTION VARCHAR,
     AVAILABLE   BOOLEAN,
-    OWNER_ID       INTEGER,
-    REQUEST_ID     INTEGER,
-    constraint "ITEMS_pk"
-        primary key (ITEM_ID),
-    constraint ITEMS_USERS_USER_ID_FK
-        foreign key (OWNER_ID) references USERS
+    OWNER_ID       INTEGER
+        constraint ITEMS_USERS_USER_ID_FK
+            references USERS,
+    REQUEST_ID  INTEGER
 );
 create table IF NOT EXISTS booking
 (

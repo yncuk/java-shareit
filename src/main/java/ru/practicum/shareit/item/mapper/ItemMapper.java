@@ -15,7 +15,8 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 null,
-                null);
+                null,
+                item.getRequestId());
     }
 
     public static Collection<ItemDto> allToItemDto(Collection<Item> items) {
@@ -29,6 +30,9 @@ public class ItemMapper {
         item.setName(itemDto.getName());
         item.setAvailable(itemDto.getAvailable());
         item.setOwner(userId);
+        if (itemDto.getRequestId() != null) {
+            item.setRequestId(itemDto.getRequestId());
+        }
         return item;
     }
 

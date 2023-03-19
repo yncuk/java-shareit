@@ -22,7 +22,7 @@ public class BookingMapper {
                 booking.getStatus());
     }
 
-    public static Collection<BookingDto> allToItemDto(Collection<Booking> bookings) {
+    public static Collection<BookingDto> allToBookingDto(Collection<Booking> bookings) {
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 

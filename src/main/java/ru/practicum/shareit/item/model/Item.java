@@ -30,7 +30,7 @@ public class Item {
     int owner;
 
     @Column(name = "REQUEST_ID")
-    int request;
+    int requestId;
 
     @OneToMany(mappedBy = "itemId")
     Set<Comment> comments;
