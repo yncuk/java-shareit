@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
@@ -20,8 +21,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Optional<Booking> findByOwnerIdAndBookingId(Integer userId, Integer bookingId);
 
     @Query(" select b from Booking b " +
-            "where b.booker.id = ?1 and b.item.id = ?2 and b.status = ?3 and b.end < ?4")
-    Optional<Booking> findByBookerIdAndItemId(Integer userId, Integer itemId, BookingStatus status, LocalDateTime now);
+            "where b.booker.id = ?1 and b.item.id = ?2 and b.status = ?3 and b.start < ?4")
+    Collection<Booking> findByBookerIdAndItemId(Integer userId, Integer itemId, BookingStatus status, LocalDateTime now);
 
 
     Booking findTop1ByItem_IdAndEndBeforeAndStatusOrderByEndDesc(int itemId, LocalDateTime end, BookingStatus status);
@@ -29,9 +30,9 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     Booking findTop1ByItem_IdAndStartAfterAndStatusOrderByStartAsc(int itemId, LocalDateTime start, BookingStatus status);
 
     @Query(" select b from Booking b " +
-            "where b.item.id = ?1 and b.end < ?2 and b.status = ?3 and b.item.owner = ?4 " +
+            "where b.item.id = ?1 and (b.end > ?2 and b.start < ?2 or b.end < ?2) and b.status = ?3 and b.item.owner = ?4 " +
             "order by b.end desc ")
-    Booking findLastBookingByItem(Integer itemId, LocalDateTime now, BookingStatus status, Integer userId);
+    List<Booking> findLastBookingByItem(Integer itemId, LocalDateTime now, BookingStatus status, Integer userId);
 
     Booking findTop1ByItem_IdAndStartAfterAndStatusAndItem_OwnerOrderByStartAsc(Integer itemId, LocalDateTime now, BookingStatus status, Integer userId);
 

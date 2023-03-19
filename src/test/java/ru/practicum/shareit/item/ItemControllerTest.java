@@ -1,24 +1,32 @@
 package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.JpaTest;
+import ru.practicum.shareit.booking.dto.BookingDtoInput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static java.lang.Thread.sleep;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Sql({"classpath:schema.sql"})
 class ItemControllerTest extends JpaTest {
     @Autowired
@@ -35,7 +44,13 @@ class ItemControllerTest extends JpaTest {
     private UserRepository userRepository;
     @Autowired
     private ItemRepository itemRepository;
+    private final ObjectMapper mapper = new ObjectMapper();
 
+    @BeforeEach
+    void setUp() {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     @Order(1)
     @Test
@@ -372,5 +387,41 @@ class ItemControllerTest extends JpaTest {
         mockMvc.perform(get("/items/10")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Order(19)
+    @Test
+    @DisplayName("Create comment")
+    void createCommentTest() throws Exception {
+        // given
+        LocalDateTime start = LocalDateTime.now().plusSeconds(1).withNano(0);
+        LocalDateTime end = LocalDateTime.now().plusHours(1).withNano(0);
+        BookingDtoInput bookingDtoInput = new BookingDtoInput();
+        bookingDtoInput.setItemId(1);
+        bookingDtoInput.setStart(start);
+        bookingDtoInput.setEnd(end);
+
+        Comment comment = new Comment();
+        comment.setText("Новый коммент");
+        // when
+        mockMvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", 2)
+                        .content(mapper.writeValueAsString(bookingDtoInput))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+        mockMvc.perform(patch("/bookings/1")
+                        .header("X-Sharer-User-Id", 1)
+                        .queryParam("approved", "true"))
+                .andExpect(status().is2xxSuccessful());
+        sleep(1100);
+        // then
+        mockMvc.perform(post("/items/1/comment")
+                        .header("X-Sharer-User-Id", 2)
+                        .content(mapper.writeValueAsString(comment))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.text", is("Новый коммент")))
+                .andExpect(jsonPath("$.authorName", is("user2")));
     }
 }

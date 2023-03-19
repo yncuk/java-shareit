@@ -9,9 +9,9 @@ public interface BookingService {
 
     BookingDto findById(Integer userId, Integer bookingId);
 
-    Collection<BookingDto> findAllByBooker(Integer bookerId, String state);
+    Collection<BookingDto> findAllByBooker(Integer bookerId, String state, Integer from, Integer size);
 
-    Collection<BookingDto> findAllByOwner(Integer ownerId, String state);
+    Collection<BookingDto> findAllByOwner(Integer ownerId, String state, Integer from, Integer size);
 
     BookingDto create(Integer userId, BookingDtoInput bookingDtoInput);
 

@@ -19,18 +19,25 @@ public class BookingController {
     private final String headerUserId = "X-Sharer-User-Id";
 
     @GetMapping("/{bookingId}")
-    public BookingDto findById(@RequestHeader(headerUserId) int userId, @PathVariable Integer bookingId) {
+    public BookingDto findById(@RequestHeader(headerUserId) int userId,
+                               @PathVariable Integer bookingId) {
         return bookingService.findById(userId, bookingId);
     }
 
     @GetMapping
-    public Collection<BookingDto> findAllByBooker(@RequestHeader(headerUserId) int bookerId, @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.findAllByBooker(bookerId, state);
+    public Collection<BookingDto> findAllByBooker(@RequestHeader(headerUserId) int bookerId,
+                                                  @RequestParam(required = false, defaultValue = "ALL") String state,
+                                                  @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
+        return bookingService.findAllByBooker(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDto> findAllByOwner(@RequestHeader(headerUserId) int ownerId, @RequestParam(required = false, defaultValue = "ALL") String state) {
-        return bookingService.findAllByOwner(ownerId, state);
+    public Collection<BookingDto> findAllByOwner(@RequestHeader(headerUserId) int ownerId,
+                                                 @RequestParam(required = false, defaultValue = "ALL") String state,
+                                                 @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                 @RequestParam(required = false, defaultValue = "10") Integer size) {
+        return bookingService.findAllByOwner(ownerId, state, from, size);
     }
 
     @PostMapping
