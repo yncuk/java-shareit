@@ -46,7 +46,7 @@ class UserControllerTest extends JpaTest {
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<User> userOptional = userRepository.findById(1);
+        Optional<User> userOptional = userRepository.findById(2);
         // then
         assertThat(userOptional)
                 .isPresent()
