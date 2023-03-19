@@ -46,12 +46,12 @@ class UserControllerTest extends JpaTest {
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
-        Optional<User> userOptional = userRepository.findById(3);
+        Optional<User> userOptional = userRepository.findById(4);
         // then
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 3)
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", 4)
                                 .hasFieldOrPropertyWithValue("name", "user1")
                                 .hasFieldOrPropertyWithValue("email", "user1@user.com")
                 );
