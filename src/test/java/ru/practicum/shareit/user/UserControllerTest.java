@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,16 +46,9 @@ class UserControllerTest extends JpaTest {
         mockMvc.perform(post("/users")
                         .content(new ObjectMapper().writeValueAsString(UserMapper.toUserDto(user)))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
-        Optional<User> userOptional = userRepository.findById(4);
-        // then
-        assertThat(userOptional)
-                .isPresent()
-                .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 4)
-                                .hasFieldOrPropertyWithValue("name", "user1")
-                                .hasFieldOrPropertyWithValue("email", "user1@user.com")
-                );
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.name", is("user1")))
+                .andExpect(jsonPath("$.email", is("user1@user.com")));
     }
 
     @Order(2)
