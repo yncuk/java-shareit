@@ -413,7 +413,7 @@ class ItemControllerTest extends JpaTest {
                         .header("X-Sharer-User-Id", 1)
                         .queryParam("approved", "true"))
                 .andExpect(status().is2xxSuccessful());
-        sleep(1100);
+        sleep(1050);
         // then
         mockMvc.perform(post("/items/1/comment")
                         .header("X-Sharer-User-Id", 2)
