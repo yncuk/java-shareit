@@ -51,9 +51,9 @@ class UserControllerTest extends JpaTest {
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "user")
-                                .hasFieldOrPropertyWithValue("email", "user@user.com")
+                        assertThat(user1).hasFieldOrPropertyWithValue("id", 2)
+                                .hasFieldOrPropertyWithValue("name", "user1")
+                                .hasFieldOrPropertyWithValue("email", "user1@user.com")
                 );
     }
 

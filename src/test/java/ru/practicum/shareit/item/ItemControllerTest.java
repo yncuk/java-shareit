@@ -422,6 +422,6 @@ class ItemControllerTest extends JpaTest {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.text", is("Новый коммент")))
-                .andExpect(jsonPath("$.authorName", is("user2")));
+                .andExpect(jsonPath("$.authorName", is("user3")));
     }
 }
