@@ -391,6 +391,30 @@ class ItemControllerTest extends JpaTest {
 
     @Order(19)
     @Test
+    @DisplayName("Search bad from and size")
+    void searchBadFromSize() throws Exception {
+        // then
+        mockMvc.perform(get("/items/search")
+                        .header("X-Sharer-User-Id", 1)
+                        .queryParam("from", "-1")
+                        .queryParam("size", "-1"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Order(20)
+    @Test
+    @DisplayName("Find all bad from and size")
+    void findAllBadFromSize() throws Exception {
+        // then
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 1)
+                        .queryParam("from", "-1")
+                        .queryParam("size", "-1"))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Order(21)
+    @Test
     @DisplayName("Create comment")
     void createCommentTest() throws Exception {
         // given
@@ -423,5 +447,65 @@ class ItemControllerTest extends JpaTest {
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.text", is("Новый коммент")))
                 .andExpect(jsonPath("$.authorName", is("user3")));
+    }
+
+    @Order(22)
+    @Test
+    @DisplayName("Find by id next and last booking")
+    void findByIdWithNextAndLastBooking() throws Exception {
+        // given
+        Item item = new Item();
+        item.setName("Пила");
+        item.setDescription("Пила необычная");
+        item.setAvailable(true);
+        item.setOwner(1);
+        Item itemResult = itemRepository.save(item);
+
+        LocalDateTime start = LocalDateTime.now().plusSeconds(1).withNano(0);
+        LocalDateTime end = LocalDateTime.now().plusSeconds(3).withNano(0);
+        BookingDtoInput bookingDtoInput = new BookingDtoInput();
+        bookingDtoInput.setItemId(itemResult.getId());
+        bookingDtoInput.setStart(start);
+        bookingDtoInput.setEnd(end);
+        // when
+        mockMvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", 2)
+                        .content(mapper.writeValueAsString(bookingDtoInput))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+        mockMvc.perform(patch("/bookings/2")
+                        .header("X-Sharer-User-Id", 1)
+                        .queryParam("approved", "true"))
+                .andExpect(status().is2xxSuccessful());
+        sleep(3050);
+        LocalDateTime start2 = LocalDateTime.now().plusSeconds(3).withNano(0);
+        LocalDateTime end2 = LocalDateTime.now().plusSeconds(60).withNano(0);
+        BookingDtoInput bookingDtoInput2 = new BookingDtoInput();
+        bookingDtoInput2.setItemId(itemResult.getId());
+        bookingDtoInput2.setStart(start2);
+        bookingDtoInput2.setEnd(end2);
+
+        User user = new User();
+        user.setName("admin");
+        user.setEmail("admin@admin.com");
+        User userResult = userRepository.save(user);
+
+        mockMvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", userResult.getId())
+                        .content(mapper.writeValueAsString(bookingDtoInput2))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+        mockMvc.perform(patch("/bookings/3")
+                        .header("X-Sharer-User-Id", 1)
+                        .queryParam("approved", "true"))
+                .andExpect(status().is2xxSuccessful());
+        // then
+        mockMvc.perform(get("/items/" + itemResult.getId())
+                        .header("X-Sharer-User-Id", userResult.getId()))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id", is(itemResult.getId())))
+                .andExpect(jsonPath("$.name", is("Пила")))
+                .andExpect(jsonPath("$.description", is("Пила необычная")))
+                .andExpect(jsonPath("$.available", is(true)));
     }
 }
