@@ -16,7 +16,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
-    private final static String HEADER_USER_ID = "X-Sharer-User-Id";
+    private static final String HEADER_USER_ID = "X-Sharer-User-Id";
 
     @GetMapping("/{bookingId}")
     public BookingDto findById(@RequestHeader(HEADER_USER_ID) int userId,

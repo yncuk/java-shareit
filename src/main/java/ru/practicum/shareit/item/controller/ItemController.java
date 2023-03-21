@@ -18,7 +18,7 @@ import java.util.Collection;
 @Validated
 public class ItemController {
     private final ItemService itemService;
-    private final static String HEADER_USER_ID = "X-Sharer-User-Id";
+    private static final String HEADER_USER_ID = "X-Sharer-User-Id";
 
     @GetMapping
     public Collection<ItemDtoComments> findAll(@RequestHeader(HEADER_USER_ID) int userId,
