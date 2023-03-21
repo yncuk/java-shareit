@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
         bookingDto.setStatus(BookingStatus.WAITING);
         bookingDto.setBooker(UserMapper.toUserDto(userRepository.getReferenceById(userId)));
         Item bookingItem = itemRepository.getReferenceById(bookingDtoInput.getItemId());
-        if (bookingItem.getOwner() == userId) {
+        if (Objects.equals(bookingItem.getOwner(), userId)) {
             throw new EntityNotFoundException("Вещь не доступна для бронирования владельцу");
         }
         bookingDto.setItem(ItemMapper.toItemDto(bookingItem));

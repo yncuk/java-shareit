@@ -40,12 +40,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public Collection<ItemRequestDto> findAll(int requesterId, Integer from, Integer size) {
+    public Collection<ItemRequestDto> findAllRequestsExceptRequester(int requesterId, Integer from, Integer size) {
         if (from < 0 || size <= 0) {
             throw new EntityBadRequestException("Количество пропущенных элементов и страниц не должно быть меньше 0");
         }
         userRepository.findById(requesterId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
-        Collection<ItemRequest> itemRequests = itemRequestRepository.findAllWithoutPropertyThisUser(requesterId);
+        Collection<ItemRequest> itemRequests = itemRequestRepository.findAllRequestsExceptRequester(requesterId);
         if (itemRequests.isEmpty()) {
             return new ArrayList<>();
         }

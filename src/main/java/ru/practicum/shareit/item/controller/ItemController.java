@@ -18,17 +18,17 @@ import java.util.Collection;
 @Validated
 public class ItemController {
     private final ItemService itemService;
-    private final String headerUserId = "X-Sharer-User-Id";
+    private final static String HEADER_USER_ID = "X-Sharer-User-Id";
 
     @GetMapping
-    public Collection<ItemDtoComments> findAll(@RequestHeader(headerUserId) int userId,
+    public Collection<ItemDtoComments> findAll(@RequestHeader(HEADER_USER_ID) int userId,
                                                @RequestParam(required = false, defaultValue = "0") Integer from,
                                                @RequestParam(required = false, defaultValue = "10") Integer size) {
         return itemService.findAll(userId, from, size);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoComments findById(@RequestHeader(headerUserId) int userId, @PathVariable Integer itemId) {
+    public ItemDtoComments findById(@RequestHeader(HEADER_USER_ID) int userId, @PathVariable Integer itemId) {
         return itemService.findById(userId, itemId);
     }
 
@@ -40,17 +40,17 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto create(@RequestHeader(headerUserId) int userId, @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto create(@RequestHeader(HEADER_USER_ID) int userId, @Valid @RequestBody ItemDto itemDto) {
         return itemService.create(userId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestHeader(headerUserId) int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
+    public ItemDto update(@RequestHeader(HEADER_USER_ID) int userId, @RequestBody ItemDto itemDto, @PathVariable Integer itemId) {
         return itemService.update(userId, itemDto, itemId);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestHeader(headerUserId) int userId, @RequestBody Comment comment, @PathVariable Integer itemId) {
+    public CommentDto createComment(@RequestHeader(HEADER_USER_ID) int userId, @RequestBody Comment comment, @PathVariable Integer itemId) {
         return itemService.createComment(userId, comment, itemId);
     }
 }

@@ -27,10 +27,10 @@ public class Item {
     Boolean available;
 
     @Column(name = "OWNER_ID")
-    int owner;
+    Integer owner;
 
     @Column(name = "REQUEST_ID")
-    int requestId;
+    Integer requestId;
 
     @OneToMany(mappedBy = "itemId")
     Set<Comment> comments;

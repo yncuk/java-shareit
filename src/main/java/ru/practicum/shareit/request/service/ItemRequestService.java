@@ -10,7 +10,7 @@ public interface ItemRequestService {
 
     Collection<ItemRequestDto> findAllByRequester(Integer requesterId);
 
-    Collection<ItemRequestDto> findAll(int requesterId, Integer from, Integer size);
+    Collection<ItemRequestDto> findAllRequestsExceptRequester(int requesterId, Integer from, Integer size);
 
     ItemRequestDto findById(Integer requesterId, Integer requestId);
 }

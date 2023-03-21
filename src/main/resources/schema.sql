@@ -16,7 +16,9 @@ create table IF NOT EXISTS ITEM_REQUEST
             primary key
         unique,
     DESCRIPTION     VARCHAR,
-    REQUESTER_ID    INTEGER,
+    REQUESTER_ID    integer
+        constraint item_request_users_user_id_fk
+            references users,
     created         TIMESTAMP
 );
 create table IF NOT EXISTS ITEMS

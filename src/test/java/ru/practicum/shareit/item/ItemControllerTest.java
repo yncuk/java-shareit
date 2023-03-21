@@ -13,19 +13,13 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.JpaTest;
 import ru.practicum.shareit.booking.dto.BookingDtoInput;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static java.lang.Thread.sleep;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -34,56 +28,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Sql({"classpath:schema.sql"})
+@Sql({"classpath:schema.sql", "classpath:item/data.sql"})
 class ItemControllerTest extends JpaTest {
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ItemRepository itemRepository;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final static ObjectMapper mapper = new ObjectMapper();
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
+        // given data.sql
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    @Order(1)
     @Test
     @DisplayName("Create item test")
     void createItemTest() throws Exception {
         // when
-        User user = new User();
-        user.setName("user");
-        user.setEmail("user@user.com");
-        userRepository.save(user);
         Item item = new Item();
         item.setName("Отвертка");
         item.setDescription("Обычная отвертка");
         item.setAvailable(true);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
+        // then
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
-        Optional<Item> itemOptional = itemRepository.findById(1);
-        // then
-        assertThat(itemOptional)
-                .isPresent()
-                .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "Отвертка")
-                                .hasFieldOrPropertyWithValue("description", "Обычная отвертка")
-                                .hasFieldOrPropertyWithValue("available", true)
-                );
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Отвертка"))
+                .andExpect(jsonPath("$.description").value("Обычная отвертка"))
+                .andExpect(jsonPath("$.available").value(true));
     }
 
-    @Order(2)
     @Test
     @DisplayName("Create item without header X-Sharer-User-Id")
     void createItemWithoutHeader() throws Exception {
@@ -92,15 +70,13 @@ class ItemControllerTest extends JpaTest {
         item.setName("Отвертка2");
         item.setDescription("Обычная отвертка2");
         item.setAvailable(true);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(3)
     @Test
     @DisplayName("Create item with not found user")
     void createItemWithNotFoundUser() throws Exception {
@@ -109,16 +85,14 @@ class ItemControllerTest extends JpaTest {
         item.setName("Отвертка2");
         item.setDescription("Обычная отвертка2");
         item.setAvailable(true);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", 10)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .header("X-Sharer-User-Id", 99)
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(4)
     @Test
     @DisplayName("Create item without available")
     void createItemWithoutAvailable() throws Exception {
@@ -126,16 +100,14 @@ class ItemControllerTest extends JpaTest {
         Item item = new Item();
         item.setName("Отвертка2");
         item.setDescription("Обычная отвертка2");
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(5)
     @Test
     @DisplayName("Create item with empty name")
     void createItemWithEmptyName() throws Exception {
@@ -144,16 +116,14 @@ class ItemControllerTest extends JpaTest {
         item.setName("");
         item.setDescription("Обычная отвертка2");
         item.setAvailable(true);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(6)
     @Test
     @DisplayName("Create item with empty description")
     void createItemWithEmptyDescription() throws Exception {
@@ -162,16 +132,14 @@ class ItemControllerTest extends JpaTest {
         item.setName("Отвертка2");
         item.setDescription("");
         item.setAvailable(true);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(7)
     @Test
     @DisplayName("Update item test")
     void updateItemTest() throws Exception {
@@ -180,25 +148,18 @@ class ItemControllerTest extends JpaTest {
         item.setName("Отвертка+");
         item.setDescription("Обычная отвертка+");
         item.setAvailable(false);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
-        mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
         // then
-        Optional<Item> itemOptional = itemRepository.findById(1);
-        assertThat(itemOptional)
-                .isPresent()
-                .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "Отвертка+")
-                                .hasFieldOrPropertyWithValue("description", "Обычная отвертка+")
-                                .hasFieldOrPropertyWithValue("available", false)
-                );
+        mockMvc.perform(patch("/items/3")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.name").value("Отвертка+"))
+                .andExpect(jsonPath("$.description").value("Обычная отвертка+"))
+                .andExpect(jsonPath("$.available").value(false));
     }
 
-    @Order(8)
     @Test
     @DisplayName("Update item without header X-Sharer-User-Id")
     void updateItemWithoutHeader() throws Exception {
@@ -207,37 +168,29 @@ class ItemControllerTest extends JpaTest {
         item.setName("Отвертка2");
         item.setDescription("Обычная отвертка2");
         item.setAvailable(false);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
-        mockMvc.perform(patch("/items/1")
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+        mockMvc.perform(patch("/items/3")
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(9)
     @Test
     @DisplayName("Update item with user 2")
     void updateItemWithUser2() throws Exception {
         // when
-        User user = new User();
-        user.setName("user3");
-        user.setEmail("user3@user.com");
-        userRepository.save(user);
         Item item = new Item();
         item.setName("Отвертка2");
         item.setDescription("Обычная отвертка2");
         item.setAvailable(false);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
-        mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 3)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+        mockMvc.perform(patch("/items/3")
+                        .header("X-Sharer-User-Id", 2)
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(10)
     @Test
     @DisplayName("Update not found item")
     void updateNotFoundItem() throws Exception {
@@ -246,91 +199,68 @@ class ItemControllerTest extends JpaTest {
         item.setName("Отвертка2");
         item.setDescription("Обычная отвертка2");
         item.setAvailable(false);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
         // then
-        mockMvc.perform(patch("/items/10")
+        mockMvc.perform(patch("/items/99")
                         .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(11)
     @Test
     @DisplayName("Update item available")
     void updateItemAvailable() throws Exception {
         // when
         Item item = new Item();
         item.setAvailable(true);
-        ItemDto itemDto = ItemMapper.toItemDto(item);
-        mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
         // then
-        Optional<Item> itemOptional = itemRepository.findById(1);
-        assertThat(itemOptional)
-                .isPresent()
-                .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "Отвертка+")
-                                .hasFieldOrPropertyWithValue("description", "Обычная отвертка+")
-                                .hasFieldOrPropertyWithValue("available", true)
-                );
+        mockMvc.perform(patch("/items/4")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(4))
+                .andExpect(jsonPath("$.name").value("Для обновления available"))
+                .andExpect(jsonPath("$.description").value("Для обновления available"))
+                .andExpect(jsonPath("$.available").value(true));
     }
 
-    @Order(12)
     @Test
     @DisplayName("Update item description")
     void updateItemDescription() throws Exception {
         // when
         Item item = new Item();
         item.setDescription("Обычная отвертка-");
-        ItemDto itemDto = ItemMapper.toItemDto(item);
-        mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
         // then
-        Optional<Item> itemOptional = itemRepository.findById(1);
-        assertThat(itemOptional)
-                .isPresent()
-                .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "Отвертка+")
-                                .hasFieldOrPropertyWithValue("description", "Обычная отвертка-")
-                                .hasFieldOrPropertyWithValue("available", true)
-                );
+        mockMvc.perform(patch("/items/5")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(jsonPath("$.name").value("Для обновления description"))
+                .andExpect(jsonPath("$.description").value("Обычная отвертка-"))
+                .andExpect(jsonPath("$.available").value(true));
     }
 
-    @Order(13)
     @Test
     @DisplayName("Update item name")
     void updateItemName() throws Exception {
         // when
         Item item = new Item();
         item.setName("Отвертка-");
-        ItemDto itemDto = ItemMapper.toItemDto(item);
-        mockMvc.perform(patch("/items/1")
-                        .header("X-Sharer-User-Id", 1)
-                        .content(new ObjectMapper().writeValueAsString(itemDto))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
         // then
-        Optional<Item> itemOptional = itemRepository.findById(1);
-        assertThat(itemOptional)
-                .isPresent()
-                .hasValueSatisfying(user1 ->
-                        assertThat(user1).hasFieldOrPropertyWithValue("id", 1)
-                                .hasFieldOrPropertyWithValue("name", "Отвертка-")
-                                .hasFieldOrPropertyWithValue("description", "Обычная отвертка-")
-                                .hasFieldOrPropertyWithValue("available", true)
-                );
+        mockMvc.perform(patch("/items/6")
+                        .header("X-Sharer-User-Id", 1)
+                        .content(new ObjectMapper().writeValueAsString(ItemMapper.toItemDto(item)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(6))
+                .andExpect(jsonPath("$.name").value("Отвертка-"))
+                .andExpect(jsonPath("$.description").value("Для обновления name"))
+                .andExpect(jsonPath("$.available").value(true));
     }
 
-    @Order(14)
     @Test
     @DisplayName("Get all items")
     void getAllItems() throws Exception {
@@ -340,35 +270,32 @@ class ItemControllerTest extends JpaTest {
                 .andExpect(status().is2xxSuccessful());
     }
 
-    @Order(15)
     @Test
-    @DisplayName("Search item ОтВертк")
+    @DisplayName("Search item ИскЛюЧ")
     void searchItemTest() throws Exception {
         // then
-        mockMvc.perform(get("/items/search?text=ОтВертк")
+        mockMvc.perform(get("/items/search?text=ИскЛюЧ")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Отвертка-"))
-                .andExpect(jsonPath("$[0].description").value("Обычная отвертка-"))
+                .andExpect(jsonPath("$[0].id").value(7))
+                .andExpect(jsonPath("$[0].name").value("Исключительное слово"))
+                .andExpect(jsonPath("$[0].description").value("Исключительное слово"))
                 .andExpect(jsonPath("$[0].available").value(true));
     }
 
-    @Order(16)
     @Test
-    @DisplayName("Search item обЫчная in description")
+    @DisplayName("Search item опиСАниЮ in description")
     void searchItemByDescription() throws Exception {
         // then
-        mockMvc.perform(get("/items/search?text=обЫчная")
+        mockMvc.perform(get("/items/search?text=опиСАниЮ")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Отвертка-"))
-                .andExpect(jsonPath("$[0].description").value("Обычная отвертка-"))
+                .andExpect(jsonPath("$[0].id").value(8))
+                .andExpect(jsonPath("$[0].name").value("Для поиска"))
+                .andExpect(jsonPath("$[0].description").value("Поиск по описанию"))
                 .andExpect(jsonPath("$[0].available").value(true));
     }
 
-    @Order(17)
     @Test
     @DisplayName("Search item empty request")
     void searchItemEmptyRequest() throws Exception {
@@ -379,17 +306,28 @@ class ItemControllerTest extends JpaTest {
                 .andExpect(content().string("[]"));
     }
 
-    @Order(18)
     @Test
     @DisplayName("Get not exist item")
     void getNotExistItem() throws Exception {
         // then
-        mockMvc.perform(get("/items/10")
+        mockMvc.perform(get("/items/99")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(19)
+    @Test
+    @DisplayName("Get exist item")
+    void getExistItem() throws Exception {
+        // then
+        mockMvc.perform(get("/items/8")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.id").value(8))
+                .andExpect(jsonPath("$.name").value("Для поиска"))
+                .andExpect(jsonPath("$.description").value("Поиск по описанию"))
+                .andExpect(jsonPath("$.available").value(true));
+    }
+
     @Test
     @DisplayName("Search bad from and size")
     void searchBadFromSize() throws Exception {
@@ -401,7 +339,6 @@ class ItemControllerTest extends JpaTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(20)
     @Test
     @DisplayName("Find all bad from and size")
     void findAllBadFromSize() throws Exception {
@@ -413,20 +350,16 @@ class ItemControllerTest extends JpaTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    @Order(21)
     @Test
-    @DisplayName("Create comment")
-    void createCommentTest() throws Exception {
+    @DisplayName("Find by id next and last booking and comment")
+    void findByIdWithNextAndLastBooking_AndComment() throws Exception {
         // given
-        LocalDateTime start = LocalDateTime.now().plusSeconds(1).withNano(0);
-        LocalDateTime end = LocalDateTime.now().plusHours(1).withNano(0);
+        LocalDateTime start = LocalDateTime.now().plusSeconds(2).withNano(0);
+        LocalDateTime end = LocalDateTime.now().plusSeconds(4).withNano(0);
         BookingDtoInput bookingDtoInput = new BookingDtoInput();
-        bookingDtoInput.setItemId(1);
+        bookingDtoInput.setItemId(9);
         bookingDtoInput.setStart(start);
         bookingDtoInput.setEnd(end);
-
-        Comment comment = new Comment();
-        comment.setText("Новый коммент");
         // when
         mockMvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", 2)
@@ -437,73 +370,44 @@ class ItemControllerTest extends JpaTest {
                         .header("X-Sharer-User-Id", 1)
                         .queryParam("approved", "true"))
                 .andExpect(status().is2xxSuccessful());
-        sleep(1050);
+        sleep(2050);
+
+        Comment comment = new Comment();
+        comment.setText("Новый коммент");
+
         // then
-        mockMvc.perform(post("/items/1/comment")
+        mockMvc.perform(post("/items/9/comment")
                         .header("X-Sharer-User-Id", 2)
                         .content(mapper.writeValueAsString(comment))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.text", is("Новый коммент")))
-                .andExpect(jsonPath("$.authorName", is("user3")));
-    }
+                .andExpect(jsonPath("$.authorName", is("user2")));
 
-    @Order(22)
-    @Test
-    @DisplayName("Find by id next and last booking")
-    void findByIdWithNextAndLastBooking() throws Exception {
-        // given
-        Item item = new Item();
-        item.setName("Пила");
-        item.setDescription("Пила необычная");
-        item.setAvailable(true);
-        item.setOwner(1);
-        Item itemResult = itemRepository.save(item);
+        sleep(3000);
 
-        LocalDateTime start = LocalDateTime.now().plusSeconds(1).withNano(0);
-        LocalDateTime end = LocalDateTime.now().plusSeconds(3).withNano(0);
-        BookingDtoInput bookingDtoInput = new BookingDtoInput();
-        bookingDtoInput.setItemId(itemResult.getId());
-        bookingDtoInput.setStart(start);
-        bookingDtoInput.setEnd(end);
-        // when
+        LocalDateTime start2 = LocalDateTime.now().plusSeconds(3).withNano(0);
+        LocalDateTime end2 = LocalDateTime.now().plusSeconds(60).withNano(0);
+        BookingDtoInput bookingDtoInput2 = new BookingDtoInput();
+        bookingDtoInput2.setItemId(9);
+        bookingDtoInput2.setStart(start2);
+        bookingDtoInput2.setEnd(end2);
+
         mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", 2)
-                        .content(mapper.writeValueAsString(bookingDtoInput))
+                        .header("X-Sharer-User-Id", 3)
+                        .content(mapper.writeValueAsString(bookingDtoInput2))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is2xxSuccessful());
         mockMvc.perform(patch("/bookings/2")
                         .header("X-Sharer-User-Id", 1)
                         .queryParam("approved", "true"))
                 .andExpect(status().is2xxSuccessful());
-        sleep(3050);
-        LocalDateTime start2 = LocalDateTime.now().plusSeconds(3).withNano(0);
-        LocalDateTime end2 = LocalDateTime.now().plusSeconds(60).withNano(0);
-        BookingDtoInput bookingDtoInput2 = new BookingDtoInput();
-        bookingDtoInput2.setItemId(itemResult.getId());
-        bookingDtoInput2.setStart(start2);
-        bookingDtoInput2.setEnd(end2);
-
-        User user = new User();
-        user.setName("admin");
-        user.setEmail("admin@admin.com");
-        User userResult = userRepository.save(user);
-
-        mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userResult.getId())
-                        .content(mapper.writeValueAsString(bookingDtoInput2))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is2xxSuccessful());
-        mockMvc.perform(patch("/bookings/3")
-                        .header("X-Sharer-User-Id", 1)
-                        .queryParam("approved", "true"))
-                .andExpect(status().is2xxSuccessful());
         // then
-        mockMvc.perform(get("/items/" + itemResult.getId())
-                        .header("X-Sharer-User-Id", userResult.getId()))
+        mockMvc.perform(get("/items/9")
+                        .header("X-Sharer-User-Id", 3))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.id", is(itemResult.getId())))
+                .andExpect(jsonPath("$.id", is(9)))
                 .andExpect(jsonPath("$.name", is("Пила")))
                 .andExpect(jsonPath("$.description", is("Пила необычная")))
                 .andExpect(jsonPath("$.available", is(true)));

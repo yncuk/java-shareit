@@ -16,16 +16,16 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
-    private final String headerUserId = "X-Sharer-User-Id";
+    private final static String HEADER_USER_ID = "X-Sharer-User-Id";
 
     @GetMapping("/{bookingId}")
-    public BookingDto findById(@RequestHeader(headerUserId) int userId,
+    public BookingDto findById(@RequestHeader(HEADER_USER_ID) int userId,
                                @PathVariable Integer bookingId) {
         return bookingService.findById(userId, bookingId);
     }
 
     @GetMapping
-    public Collection<BookingDto> findAllByBooker(@RequestHeader(headerUserId) int bookerId,
+    public Collection<BookingDto> findAllByBooker(@RequestHeader(HEADER_USER_ID) int bookerId,
                                                   @RequestParam(required = false, defaultValue = "ALL") String state,
                                                   @RequestParam(required = false, defaultValue = "0") Integer from,
                                                   @RequestParam(required = false, defaultValue = "10") Integer size) {
@@ -33,7 +33,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDto> findAllByOwner(@RequestHeader(headerUserId) int ownerId,
+    public Collection<BookingDto> findAllByOwner(@RequestHeader(HEADER_USER_ID) int ownerId,
                                                  @RequestParam(required = false, defaultValue = "ALL") String state,
                                                  @RequestParam(required = false, defaultValue = "0") Integer from,
                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
@@ -41,12 +41,12 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingDto create(@RequestHeader(headerUserId) int userId, @RequestBody BookingDtoInput bookingDtoInput) {
+    public BookingDto create(@RequestHeader(HEADER_USER_ID) int userId, @RequestBody BookingDtoInput bookingDtoInput) {
         return bookingService.create(userId, bookingDtoInput);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto update(@RequestHeader(headerUserId) int userId, @PathVariable Integer bookingId, @RequestParam Boolean approved) {
+    public BookingDto update(@RequestHeader(HEADER_USER_ID) int userId, @PathVariable Integer bookingId, @RequestParam Boolean approved) {
         return bookingService.update(userId, bookingId, approved);
     }
 }

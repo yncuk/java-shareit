@@ -13,5 +13,5 @@ public interface ItemRequestRepository extends JpaRepository<ItemRequest, Intege
     @Query(" select i from ItemRequest i " +
             "where i.requester.id <> ?1 " +
             "order by i.created")
-    Collection<ItemRequest> findAllWithoutPropertyThisUser(Integer requesterId);
+    Collection<ItemRequest> findAllRequestsExceptRequester(Integer requesterId);
 }
