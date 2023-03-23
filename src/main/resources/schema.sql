@@ -19,8 +19,6 @@ create table IF NOT EXISTS ITEM_REQUEST
             references users,
     created         TIMESTAMP
 );
-create index index_requester_id
-    on item_request (requester_id);
 create table IF NOT EXISTS ITEMS
 (
     ITEM_ID     serial
