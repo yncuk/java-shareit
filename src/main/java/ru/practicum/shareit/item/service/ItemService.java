@@ -8,7 +8,7 @@ import ru.practicum.shareit.item.model.Comment;
 import java.util.Collection;
 
 public interface ItemService {
-    Collection<ItemDtoComments> findAll(Integer userId);
+    Collection<ItemDtoComments> findAll(Integer userId, Integer from, Integer size);
 
     ItemDtoComments findById(Integer userId, Integer itemId);
 
@@ -16,7 +16,7 @@ public interface ItemService {
 
     ItemDto update(Integer userId, ItemDto itemDto, Integer itemId);
 
-    Collection<ItemDto> search(String text);
+    Collection<ItemDto> search(String text, Integer from, Integer size);
 
     CommentDto createComment(Integer userId, Comment comment, Integer itemId);
 }

@@ -19,6 +19,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,40 +37,46 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> findAllByBooker(Integer bookerId, String state) {
+    public Collection<BookingDto> findAllByBooker(Integer bookerId, String state, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new EntityBadRequestException("Количество пропущенных элементов и страниц не должно быть меньше 0");
+        }
         userRepository.findById(bookerId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
         switch (state) {
             case "ALL":
-                return BookingMapper.allToItemDto(bookingRepository.findAllByBooker(bookerId));
+                return BookingMapper.allToBookingDto(bookingRepository.findAllByBooker(bookerId).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "CURRENT":
-                return BookingMapper.allToItemDto(bookingRepository.findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(), LocalDateTime.now()));
+                return BookingMapper.allToBookingDto(bookingRepository.findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(), LocalDateTime.now()).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "PAST":
-                return BookingMapper.allToItemDto(bookingRepository.findByBooker_IdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now()));
+                return BookingMapper.allToBookingDto(bookingRepository.findByBooker_IdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now()).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "FUTURE":
-                return BookingMapper.allToItemDto(bookingRepository.findByBooker_IdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now()));
+                return BookingMapper.allToBookingDto(bookingRepository.findByBooker_IdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now()).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "WAITING":
             case "REJECTED":
-                return BookingMapper.allToItemDto(bookingRepository.findByBooker_IdAndStatusIsOrderByStartDesc(bookerId, BookingStatus.valueOf(state)));
+                return BookingMapper.allToBookingDto(bookingRepository.findByBooker_IdAndStatusIsOrderByStartDesc(bookerId, BookingStatus.valueOf(state)).stream().skip(from).limit(size).collect(Collectors.toList()));
             default:
                 throw new EntityBadRequestException(String.format("Unknown state: %S", state));
         }
     }
 
     @Override
-    public Collection<BookingDto> findAllByOwner(Integer ownerId, String state) {
+    public Collection<BookingDto> findAllByOwner(Integer ownerId, String state, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new EntityBadRequestException("Количество пропущенных элементов и страниц не должно быть меньше 0");
+        }
         userRepository.findById(ownerId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
         switch (state) {
             case "ALL":
-                return BookingMapper.allToItemDto(bookingRepository.findAllByOwner(ownerId));
+                return BookingMapper.allToBookingDto(bookingRepository.findAllByOwner(ownerId).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "CURRENT":
-                return BookingMapper.allToItemDto(bookingRepository.findByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now()));
+                return BookingMapper.allToBookingDto(bookingRepository.findByItem_OwnerAndStartBeforeAndEndAfterOrderByStartDesc(ownerId, LocalDateTime.now(), LocalDateTime.now()).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "PAST":
-                return BookingMapper.allToItemDto(bookingRepository.findByItem_OwnerAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now()));
+                return BookingMapper.allToBookingDto(bookingRepository.findByItem_OwnerAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now()).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "FUTURE":
-                return BookingMapper.allToItemDto(bookingRepository.findByItem_OwnerAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now()));
+                return BookingMapper.allToBookingDto(bookingRepository.findByItem_OwnerAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now()).stream().skip(from).limit(size).collect(Collectors.toList()));
             case "WAITING":
             case "REJECTED":
-                return BookingMapper.allToItemDto(bookingRepository.findByItem_OwnerAndStatusIsOrderByStartDesc(ownerId, BookingStatus.valueOf(state)));
+                return BookingMapper.allToBookingDto(bookingRepository.findByItem_OwnerAndStatusIsOrderByStartDesc(ownerId, BookingStatus.valueOf(state)).stream().skip(from).limit(size).collect(Collectors.toList()));
             default:
                 throw new EntityBadRequestException(String.format("Unknown state: %S", state));
         }
@@ -85,11 +93,14 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().isBefore(LocalDateTime.now()) || bookingDto.getEnd().isBefore(LocalDateTime.now())) {
             throw new EntityBadRequestException("Неправильно задано время бронирования");
         }
+        if (bookingDto.getStart().equals(bookingDto.getEnd())) {
+            throw new EntityBadRequestException("Время начала и окончания бронирования не может совпадать");
+        }
         bookingDto.setStatus(BookingStatus.WAITING);
         bookingDto.setBooker(UserMapper.toUserDto(userRepository.getReferenceById(userId)));
         Item bookingItem = itemRepository.getReferenceById(bookingDtoInput.getItemId());
-        if (bookingItem.getOwner() == userId) {
-            throw new EntityNotFoundException("Вещь для доступна для бронирования владельцу");
+        if (Objects.equals(bookingItem.getOwner(), userId)) {
+            throw new EntityNotFoundException("Вещь не доступна для бронирования владельцу");
         }
         bookingDto.setItem(ItemMapper.toItemDto(bookingItem));
         return BookingMapper.toBookingDto(bookingRepository.save(BookingMapper.toBooking(bookingDto)));

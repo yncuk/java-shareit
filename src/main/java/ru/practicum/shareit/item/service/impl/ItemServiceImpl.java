@@ -26,6 +26,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -38,7 +40,10 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
 
     @Override
-    public Collection<ItemDtoComments> findAll(Integer userId) {
+    public Collection<ItemDtoComments> findAll(Integer userId, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new EntityBadRequestException("Количество пропущенных элементов и страниц не должно быть меньше 0");
+        }
         userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
         Collection<ItemDtoComments> items = ItemMapper.allToItemDtoWithComments(itemRepository.findItemsByOwnerOrderById(userId));
         for (ItemDtoComments currentItem : items) {
@@ -51,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
                 currentItem.setLastBooking(BookingMapper.bookingDtoForItem(lastBooking));
             }
         }
-        return items;
+        return items.stream().skip(from).limit(size).collect(Collectors.toList());
     }
 
     @Override
@@ -62,8 +67,9 @@ public class ItemServiceImpl implements ItemService {
         if (nextBooking != null) {
             itemDtoComments.setNextBooking(BookingMapper.bookingDtoForItem(nextBooking));
         }
-        Booking lastBooking = bookingRepository.findLastBookingByItem(itemId, LocalDateTime.now(), BookingStatus.APPROVED, userId);
-        if (lastBooking != null) {
+        List<Booking> optionalBooking = bookingRepository.findLastBookingByItem(itemId, LocalDateTime.now(), BookingStatus.APPROVED, userId);
+        if (!optionalBooking.isEmpty()) {
+            Booking lastBooking = optionalBooking.get(0);
             itemDtoComments.setLastBooking(BookingMapper.bookingDtoForItem(lastBooking));
         }
         return itemDtoComments;
@@ -71,7 +77,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(Integer userId, ItemDto itemDto) {
-        userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
         return ItemMapper.toItemDto(itemRepository.save(ItemMapper.toItem(itemDto, userId)));
     }
 
@@ -98,18 +105,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> search(String text) {
+    public Collection<ItemDto> search(String text, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new EntityBadRequestException("Количество пропущенных элементов и страниц не должно быть меньше 0");
+        }
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return ItemMapper.allToItemDto(itemRepository.search(text));
+        return ItemMapper.allToItemDto(itemRepository.search(text).stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 
     @Override
     public CommentDto createComment(Integer userId, Comment comment, Integer itemId) {
         comment.setAuthor(userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь")));
         itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException("Не найдена вещь"));
-        bookingRepository.findByBookerIdAndItemId(userId, itemId, BookingStatus.APPROVED, LocalDateTime.now()).orElseThrow(() -> new EntityBadRequestException("У пользователя нет бронирования этой вещи"));
+        if (bookingRepository.findByBookerIdAndItemId(userId, itemId, BookingStatus.APPROVED, LocalDateTime.now()).isEmpty()) {
+            throw new EntityBadRequestException("У пользователя нет бронирования этой вещи");
+        }
         comment.setCreated(LocalDateTime.now());
         comment.setItemId(itemId);
         return CommentMapper.toCommentDto(commentRepository.save(comment));
