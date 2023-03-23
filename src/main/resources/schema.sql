@@ -2,8 +2,7 @@ create table IF NOT EXISTS USERS
 (
     USER_ID    serial
         constraint "USERS_pk"
-        primary key
-        unique,
+        primary key,
     USER_NAME  VARCHAR,
     EMAIL      VARCHAR not null,
     IS_DELETED BOOLEAN,
@@ -13,14 +12,15 @@ create table IF NOT EXISTS ITEM_REQUEST
 (
     ITEM_REQUEST_ID serial
         constraint "ITEM_REQUEST_pk"
-            primary key
-        unique,
+            primary key,
     DESCRIPTION     VARCHAR,
     REQUESTER_ID    integer
         constraint item_request_users_user_id_fk
             references users,
     created         TIMESTAMP
 );
+create index index_requester_id
+    on item_request (requester_id);
 create table IF NOT EXISTS ITEMS
 (
     ITEM_ID     serial
@@ -38,8 +38,7 @@ create table IF NOT EXISTS booking
 (
     booking_id serial
         constraint "BOOKING_pk"
-        primary key
-        unique,
+        primary key,
     start_time TIMESTAMP,
     end_time   TIMESTAMP,
     item_id    INTEGER
@@ -54,8 +53,7 @@ create table IF NOT EXISTS comments
 (
     comment_id   serial
         constraint "COMMENT_pk"
-        primary key
-        unique,
+        primary key,
     comment_text VARCHAR(150),
     item_id      INTEGER
         constraint comments_items_item_id_fk
