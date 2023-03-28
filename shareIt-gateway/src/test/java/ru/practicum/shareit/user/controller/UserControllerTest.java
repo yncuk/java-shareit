@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.ShareItGateway;
-import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,12 +27,12 @@ class UserControllerTest {
     @DisplayName("Create user with bad email")
     void createUserWithBadEmail(String mail) throws Exception {
         // when
-        UserCreateDto userCreateDto = new UserCreateDto();
-        userCreateDto.setName("user2");
-        userCreateDto.setEmail(mail);
+        UserDto userDto = new UserDto();
+        userDto.setName("user2");
+        userDto.setEmail(mail);
         // then
         mockMvc.perform(post("/users")
-                        .content(new ObjectMapper().writeValueAsString(userCreateDto))
+                        .content(new ObjectMapper().writeValueAsString(userDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }

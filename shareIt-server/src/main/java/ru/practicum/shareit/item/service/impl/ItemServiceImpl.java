@@ -24,7 +24,6 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -104,9 +103,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> search(Integer userId, String text, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Не найден пользователь"));
-        if (text.isBlank()) {
-            return new ArrayList<>();
-        }
         return ItemMapper.allToItemDto(itemRepository.search(text).stream().skip(from).limit(size).collect(Collectors.toList()));
     }
 

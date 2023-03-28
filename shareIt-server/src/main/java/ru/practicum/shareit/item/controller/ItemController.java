@@ -21,8 +21,8 @@ public class ItemController {
 
     @GetMapping
     public Collection<ItemDtoComments> findAll(@RequestHeader(HEADER_USER_ID) int userId,
-                                               @RequestParam(required = false) Integer from,
-                                               @RequestParam(required = false) Integer size) {
+                                               @RequestParam Integer from,
+                                               @RequestParam Integer size) {
         return itemService.findAll(userId, from, size);
     }
 
@@ -35,8 +35,8 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemDto> search(@RequestHeader(HEADER_USER_ID) int userId,
                                       @RequestParam String text,
-                                      @RequestParam(required = false) Integer from,
-                                      @RequestParam(required = false) Integer size) {
+                                      @RequestParam Integer from,
+                                      @RequestParam Integer size) {
         return itemService.search(userId, text, from, size);
     }
 

@@ -13,10 +13,8 @@ import javax.validation.constraints.NotNull;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRequestDto {
     long id;
-    @NotNull
     @NotBlank
     String name;
-    @NotNull
     @NotBlank
     String description;
     @NotNull

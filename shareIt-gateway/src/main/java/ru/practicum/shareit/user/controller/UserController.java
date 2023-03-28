@@ -7,10 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.UserClient;
-import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.Create;
+import ru.practicum.shareit.user.dto.Update;
 import ru.practicum.shareit.user.dto.UserDto;
-
-import javax.validation.Valid;
 
 @Controller
 @RequestMapping(path = "/users")
@@ -31,13 +30,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@Valid @RequestBody UserCreateDto userCreateDto) {
-        return userClient.create(userCreateDto);
+    public ResponseEntity<Object> create(@Validated(Create.class) @RequestBody UserDto userDto) {
+        return userClient.create(userDto);
     }
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> update(@PathVariable long userId,
-                                         @RequestBody @Valid UserDto userDto) {
+                                         @RequestBody @Validated(Update.class) UserDto userDto) {
         return userClient.update(userId, userDto);
     }
 

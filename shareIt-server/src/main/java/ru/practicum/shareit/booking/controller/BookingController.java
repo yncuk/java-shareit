@@ -24,16 +24,16 @@ public class BookingController {
     @GetMapping
     public Collection<BookingDto> findAllByBooker(@RequestHeader(HEADER_USER_ID) int bookerId,
                                                   @RequestParam String state,
-                                                  @RequestParam(required = false) Integer from,
-                                                  @RequestParam(required = false) Integer size) {
+                                                  @RequestParam Integer from,
+                                                  @RequestParam Integer size) {
         return bookingService.findAllByBooker(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
     public Collection<BookingDto> findAllByOwner(@RequestHeader(HEADER_USER_ID) int ownerId,
                                                  @RequestParam String state,
-                                                 @RequestParam(required = false) Integer from,
-                                                 @RequestParam(required = false) Integer size) {
+                                                 @RequestParam Integer from,
+                                                 @RequestParam Integer size) {
         return bookingService.findAllByOwner(ownerId, state, from, size);
     }
 

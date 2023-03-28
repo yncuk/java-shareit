@@ -26,8 +26,8 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Object> findAll(@RequestHeader(HEADER_USER_ID) long userId,
-                                          @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                                          @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                          @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                          @Positive @RequestParam(defaultValue = "10") Integer size) {
         return itemClient.findAll(userId, from, size);
     }
 

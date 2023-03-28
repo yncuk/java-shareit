@@ -31,8 +31,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public Collection<ItemRequestDto> findAllRequestsExceptRequester(@RequestHeader(HEADER_USER_ID) int requesterId,
-                                                                     @RequestParam(required = false) Integer from,
-                                                                     @RequestParam(required = false) Integer size) {
+                                                                     @RequestParam Integer from,
+                                                                     @RequestParam Integer size) {
         return itemRequestService.findAllRequestsExceptRequester(requesterId, from, size);
     }
 

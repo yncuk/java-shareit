@@ -36,8 +36,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> findAllRequestsExceptRequester(@RequestHeader(HEADER_USER_ID) long requesterId,
-                                                                 @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                                 @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
+                                                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                                 @Positive @RequestParam(defaultValue = "10") Integer size) {
         return itemRequestClient.findAllRequestsExceptRequester(requesterId, from, size);
     }
 
