@@ -257,16 +257,6 @@ class ItemControllerTest extends JpaTest {
     }
 
     @Test
-    @DisplayName("Search item empty request")
-    void searchItemEmptyRequest() throws Exception {
-        // then
-        mockMvc.perform(get("/items/search?text=")
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().string("[]"));
-    }
-
-    @Test
     @DisplayName("Get not exist item")
     void getNotExistItem() throws Exception {
         // then

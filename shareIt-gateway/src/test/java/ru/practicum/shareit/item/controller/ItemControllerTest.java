@@ -11,7 +11,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.ShareItGateway;
 import ru.practicum.shareit.item.dto.ItemRequestDto;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = {ShareItGateway.class})
@@ -66,5 +68,15 @@ class ItemControllerTest {
                         .content(new ObjectMapper().writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Search item empty request")
+    void searchItemEmptyRequest() throws Exception {
+        // then
+        mockMvc.perform(get("/items/search?text=")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().string("[]"));
     }
 }
